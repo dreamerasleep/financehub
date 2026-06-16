@@ -1,0 +1,42 @@
+# IDE
+.idea/
+.vscode/
+*.iml
+.project
+.classpath
+.settings/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Java / Maven
+backend/target/
+backend/.mvn/wrapper/maven-wrapper.jar
+backend/dependency-reduced-pom.xml
+*.class
+
+# Node / React
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+frontend/coverage/
+frontend/.env.local
+frontend/.env.*.local
+
+# Logs
+*.log
+logs/
+
+# Env / Secrets
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+
+# Docker
+*.pid
+
+# Render
+.render-buildlogs
