@@ -3,6 +3,23 @@ spring:
     name: financehub-backend
   profiles:
     active: ${SPRING_PROFILES_ACTIVE:dev}
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/financehub}
+    username: ${DB_USERNAME:financehub}
+    password: ${DB_PASSWORD:financehub_dev}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+        format_sql: false
+    open-in-view: false
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
 
 server:
   port: ${SERVER_PORT:8080}
@@ -21,6 +38,12 @@ springdoc:
     path: /swagger-ui.html
   api-docs:
     path: /v3/api-docs
+
+financehub:
+  security:
+    jwt:
+      secret: ${JWT_SECRET:dev-secret-change-me-please-use-at-least-32-bytes-long-key-xxx}
+      expiration: ${JWT_EXPIRATION:PT24H}
 
 logging:
   level:

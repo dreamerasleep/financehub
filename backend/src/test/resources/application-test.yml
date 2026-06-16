@@ -1,0 +1,12 @@
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: validate
+  flyway:
+    enabled: true
+
+financehub:
+  security:
+    jwt:
+      secret: test-secret-please-use-at-least-32-bytes-long-key-for-tests-xx
+      expiration: PT1H
