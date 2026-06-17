@@ -6,12 +6,17 @@
 
 ---
 
-## [Unreleased] — Sprint 1 前端進行中
+## [Unreleased] — Sprint 1 完成
 
-### 計畫
-- React + Vite + TypeScript 前端骨架
-- 登入 / 註冊頁
-- 帳戶列表頁（受保護路由）
+### 新增（前端）
+- React 19 + Vite 8 + TypeScript 6 + Ant Design 5 骨架
+- 註冊 / 登入頁（tab 切換、AntD 表單驗證、中文化）
+- 帳戶列表頁（受保護路由、CRUD modal、Popconfirm 刪除）
+- axios JWT interceptor + 401 自動導向登入
+- Zustand auth store（persist 至 localStorage）
+- TanStack Query 管理 server state
+- React Router v7 受保護路由 + 自動跳轉
+- frontend-ci.yml（lint + typecheck + build）
 
 ---
 

@@ -14,7 +14,7 @@
 | Sprint | 期程 | 主題 | 狀態 |
 | ------ | ---- | ---- | ---- |
 | S0 | W1 | 基礎建設 / Bootstrap | ✅ 完成 |
-| S1 | W2–3 | 使用者驗證 + 帳戶 CRUD | 🟡 後端完成、前端未開工 |
+| S1 | W2–3 | 使用者驗證 + 帳戶 CRUD | ✅ 完成（前後端） |
 | S2 | W4–5 | 交易紀錄 + 手動輸入 | ⏳ 規劃中 |
 | S3 | W6–7 | CSV / Excel 匯入 | ⏳ 規劃中 |
 | S4 | W8–9 | 收據 OCR | ⏳ 規劃中 |
@@ -83,13 +83,13 @@
 
 ### 立即下一步（Sprint 1 收尾）
 
-- [ ] **F-01**：建立 React + Vite + TypeScript 前端骨架（`frontend/`）
-- [ ] **F-02**：安裝 Ant Design 5、React Router、axios、Zustand、React Query
-- [ ] **F-03**：axios interceptor（自動帶 JWT、401 導向登入）
-- [ ] **F-04**：登入頁、註冊頁
-- [ ] **F-05**：帳戶列表頁（受保護路由 + AntD Table + 新增/編輯/刪除 modal）
-- [ ] **F-06**：`.github/workflows/frontend-ci.yml`（lint + typecheck + build）
-- [ ] **F-07**：前端 README 與啟動指令
+- [x] **F-01**：建立 React + Vite + TypeScript 前端骨架（`frontend/`）
+- [x] **F-02**：安裝 Ant Design 5、React Router、axios、Zustand、React Query
+- [x] **F-03**：axios interceptor（自動帶 JWT、401 導向登入）
+- [x] **F-04**：登入頁、註冊頁
+- [x] **F-05**：帳戶列表頁（受保護路由 + AntD Table + 新增/編輯/刪除 modal）
+- [x] **F-06**：`.github/workflows/frontend-ci.yml`（lint + typecheck + build）
+- [ ] **F-07**：前端 README 與啟動指令（待補）
 
 ### Sprint 2 — 交易紀錄 + 手動輸入
 
@@ -162,6 +162,18 @@
 ## 6. 進度日誌（Changelog）
 
 > 每次告一段落時新增一筆條目（最新在最上方）。
+
+### 2026-06-17（夜段） — Sprint 1 前端完成
+
+- 用 `npm create vite@latest` 建立 React 19 + TS 6 + Vite 8 骨架
+- 安裝 AntD 5、React Router 7、Zustand 5、TanStack Query 5、axios
+- 完成：登入/註冊頁、帳戶 CRUD 頁、AppLayout、ProtectedRoute、axios interceptor
+- Vite proxy 設定 `/api` → `localhost:8080` 避開本機 CORS
+- 路徑別名 `@/*` → `src/*`
+- 新增 `frontend-ci.yml`（lint + typecheck + build）
+- E2E 用 Playwright 驗證：註冊→自動登入→新增→編輯→刪除→登出，全綠
+- 同步更新 `docs-site/`：新增 `architecture/frontend.md`、更新 changelog 與首頁狀態表
+- **下一步**：補 `frontend/README.md`（F-07），或進 Sprint 2（交易紀錄）
 
 ### 2026-06-17（晚段） — 建立文件站
 

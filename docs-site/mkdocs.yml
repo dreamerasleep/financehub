@@ -83,6 +83,7 @@ nav:
       - architecture/index.md
       - 整體架構: architecture/overview.md
       - 後端設計: architecture/backend.md
+      - 前端設計: architecture/frontend.md
       - 資料庫設計: architecture/database.md
       - 安全性與驗證: architecture/security.md
   - API 參考:

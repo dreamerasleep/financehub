@@ -47,3 +47,6 @@ scripts/clickup_state.json
 # MkDocs build output and local venv
 docs-site/site/
 docs-site/.venv/
+
+# Project-local trash (per CLAUDE.md no-delete policy)
+.trash/
