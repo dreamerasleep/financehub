@@ -1,0 +1,104 @@
+site_name: FinanceHub 文件
+site_description: 個人財務管理系統 — 使用者手冊與技術文件
+site_author: dreamerasleep
+repo_url: https://github.com/dreamerasleep/financehub
+repo_name: dreamerasleep/financehub
+edit_uri: edit/main/docs-site/docs/
+
+theme:
+  name: material
+  language: zh-TW
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - navigation.indexes
+    - navigation.footer
+    - content.code.copy
+    - content.code.annotate
+    - content.action.edit
+    - search.suggest
+    - search.highlight
+    - toc.follow
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/weather-night
+        name: 切換深色模式
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/weather-sunny
+        name: 切換淺色模式
+  icon:
+    repo: fontawesome/brands/github
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - def_list
+  - footnotes
+  - md_in_html
+  - toc:
+      permalink: true
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+
+plugins:
+  - search:
+      lang:
+        - zh
+        - en
+
+nav:
+  - 首頁: index.md
+  - 開始使用:
+      - getting-started/index.md
+      - 安裝與環境準備: getting-started/installation.md
+      - 5 分鐘快速上手: getting-started/quickstart.md
+  - 使用者手冊:
+      - user-guide/index.md
+      - 註冊與登入: user-guide/auth.md
+      - 帳戶管理: user-guide/accounts.md
+  - 系統架構:
+      - architecture/index.md
+      - 整體架構: architecture/overview.md
+      - 後端設計: architecture/backend.md
+      - 資料庫設計: architecture/database.md
+      - 安全性與驗證: architecture/security.md
+  - API 參考:
+      - api-reference/index.md
+      - 驗證 API: api-reference/auth.md
+      - 帳戶 API: api-reference/accounts.md
+  - 維運手冊:
+      - operations/index.md
+      - 本機開發: operations/local-dev.md
+      - 測試: operations/testing.md
+      - 部署 (Render): operations/deployment.md
+      - 疑難排解: operations/troubleshooting.md
+  - 名詞解釋: glossary.md
+  - 變更紀錄: changelog.md
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/dreamerasleep/financehub

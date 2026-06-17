@@ -40,3 +40,10 @@ logs/
 
 # Render
 .render-buildlogs
+
+# ClickUp sync state (auto-generated, contains ClickUp IDs)
+scripts/clickup_state.json
+
+# MkDocs build output and local venv
+docs-site/site/
+docs-site/.venv/
