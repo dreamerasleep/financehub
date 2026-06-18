@@ -6,7 +6,22 @@
 
 ---
 
-## [Unreleased] — Sprint 2 完成
+## [Unreleased] — Sprint 2.5 完成
+
+### 新增（後端）
+- Flyway V3 migration：`transactions.to_account_id`、`category_id` 改 NULL、`type` CHECK 加 `TRANSFER`、`chk_transactions_transfer_shape` 跨欄位約束
+- TRANSFER 交易：單筆 row 同時記錄來源 / 目標帳戶；`TransactionService` 在 `@Transactional` 內同步兩個帳戶餘額；更新 / 刪除會還原雙邊
+- 驗證：拒絕相同帳戶轉帳、拒絕跨幣別、拒絕誤帶 `categoryId`
+- 整合測試擴充至 20/20（新增 6 個 TRANSFER 案例）
+
+### 新增（前端）
+- 交易頁支援轉帳：類型多「轉帳」選項；轉帳模式隱藏分類、改顯示目標帳戶下拉（自動過濾同幣別、排除來源帳戶）
+- 列表「帳戶」欄位轉帳顯示「來源 → 目標」
+- 帳戶頁兩端餘額即時反映轉帳
+
+---
+
+## [0.3.0] — 2026-06-18 — Sprint 2 完成
 
 ### 新增（後端）
 - Flyway V2 migration：`categories`、`transactions`、11 個系統分類種子

@@ -4,9 +4,18 @@ import java.math.BigDecimal;
 
 public enum TransactionType {
     INCOME,
-    EXPENSE;
+    EXPENSE,
+    TRANSFER;
 
+    /**
+     * Signed delta applied to the source (from) account.
+     * EXPENSE / TRANSFER reduce the source; INCOME increases it.
+     */
     public BigDecimal signedAmount(BigDecimal amount) {
-        return this == EXPENSE ? amount.negate() : amount;
+        return this == INCOME ? amount : amount.negate();
+    }
+
+    public boolean isTransfer() {
+        return this == TRANSFER;
     }
 }

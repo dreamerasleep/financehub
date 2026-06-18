@@ -20,7 +20,10 @@ public class Transaction {
     @Column(name = "account_id", nullable = false)
     private Long accountId;
 
-    @Column(name = "category_id", nullable = false)
+    @Column(name = "to_account_id")
+    private Long toAccountId;
+
+    @Column(name = "category_id")
     private Long categoryId;
 
     @Enumerated(EnumType.STRING)
@@ -59,8 +62,14 @@ public class Transaction {
 
     public Transaction(Long userId, Long accountId, Long categoryId, TransactionType type,
                        BigDecimal amount, LocalDate txnDate, String note) {
+        this(userId, accountId, null, categoryId, type, amount, txnDate, note);
+    }
+
+    public Transaction(Long userId, Long accountId, Long toAccountId, Long categoryId,
+                       TransactionType type, BigDecimal amount, LocalDate txnDate, String note) {
         this.userId = userId;
         this.accountId = accountId;
+        this.toAccountId = toAccountId;
         this.categoryId = categoryId;
         this.type = type;
         this.amount = amount;
@@ -72,6 +81,8 @@ public class Transaction {
     public Long getUserId() { return userId; }
     public Long getAccountId() { return accountId; }
     public void setAccountId(Long accountId) { this.accountId = accountId; }
+    public Long getToAccountId() { return toAccountId; }
+    public void setToAccountId(Long toAccountId) { this.toAccountId = toAccountId; }
     public Long getCategoryId() { return categoryId; }
     public void setCategoryId(Long categoryId) { this.categoryId = categoryId; }
     public TransactionType getType() { return type; }

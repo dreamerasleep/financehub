@@ -71,26 +71,33 @@ users ─┬─< accounts ─┐
 - 唯一索引：系統分類 `(name, kind)` 唯一；使用者分類 `(user_id, name, kind)` 唯一
 - 種子：V2 migration 寫入 4 個 INCOME + 7 個 EXPENSE 預設分類
 
-### `transactions` (V2)
+### `transactions` (V2, V3)
 
 | 欄位 | 型別 | 限制 | 說明 |
 | ---- | ---- | ---- | ---- |
 | `id` | `BIGSERIAL` | PK | |
 | `user_id` | `BIGINT` | NOT NULL, FK → `users.id` ON DELETE CASCADE | 擁有者 |
-| `account_id` | `BIGINT` | NOT NULL, FK → `accounts.id` ON DELETE CASCADE | 影響哪個帳戶 |
-| `category_id` | `BIGINT` | NOT NULL, FK → `categories.id` ON DELETE RESTRICT | 分類 |
-| `type` | `VARCHAR(10)` | NOT NULL, CHECK | `INCOME` / `EXPENSE` |
+| `account_id` | `BIGINT` | NOT NULL, FK → `accounts.id` ON DELETE CASCADE | 影響的（來源）帳戶 |
+| `to_account_id` | `BIGINT` | NULL（V3），FK → `accounts.id` ON DELETE CASCADE | 轉帳目標帳戶 |
+| `category_id` | `BIGINT` | NULL（V3），FK → `categories.id` ON DELETE RESTRICT | 分類 |
+| `type` | `VARCHAR(10)` | NOT NULL, CHECK | `INCOME` / `EXPENSE` / `TRANSFER`（V3 起） |
 | `amount` | `NUMERIC(18,2)` | NOT NULL, CHECK `amount > 0` | 絕對值，方向由 `type` 決定 |
 | `txn_date` | `DATE` | NOT NULL | 交易日 |
 | `note` | `VARCHAR(255)` | NULL | 備註 |
 | `created_at` / `updated_at` | `TIMESTAMPTZ` | NOT NULL, default `now()` | |
 
+額外約束（`chk_transactions_transfer_shape`）：
+
+- `type = 'TRANSFER'`：`to_account_id IS NOT NULL` 且 `≠ account_id`、`category_id IS NULL`
+- `type IN ('INCOME', 'EXPENSE')`：`to_account_id IS NULL`、`category_id IS NOT NULL`
+
 索引：
 - `idx_transactions_user_id` on `user_id`
 - `idx_transactions_account_id` on `account_id`
+- `idx_transactions_to_account_id` on `to_account_id`（V3）
 - `idx_transactions_user_date` on `(user_id, txn_date DESC)`（列表頁主要查詢）
 
-餘額同步：`TransactionService` 在 `@Transactional` 內同時寫入交易並調整 `accounts.current_balance`，更新 / 刪除前會先還原舊金額。
+餘額同步：`TransactionService` 在 `@Transactional` 內同時寫入交易並調整 `accounts.current_balance`。轉帳會同時調整來源（−amount）與目標（+amount）兩邊，更新 / 刪除前會先還原雙邊舊金額。跨幣別轉帳目前回 400，待 Sprint 5 匯率服務上線後解鎖。
 
 ## 設計取捨
 

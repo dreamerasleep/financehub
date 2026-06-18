@@ -39,7 +39,8 @@ const { RangePicker } = DatePicker
 
 interface FormValues {
   accountId: number
-  categoryId: number
+  toAccountId?: number
+  categoryId?: number
   type: TransactionType
   amount: number
   txnDate: Dayjs
@@ -49,6 +50,19 @@ interface FormValues {
 const typeTagColor: Record<TransactionType, string> = {
   INCOME: 'green',
   EXPENSE: 'red',
+  TRANSFER: 'blue',
+}
+
+const amountColor: Record<TransactionType, string> = {
+  INCOME: '#3f8600',
+  EXPENSE: '#cf1322',
+  TRANSFER: '#1677ff',
+}
+
+const amountSign: Record<TransactionType, string> = {
+  INCOME: '+',
+  EXPENSE: '-',
+  TRANSFER: '',
 }
 
 export function TransactionsPage() {
@@ -58,6 +72,8 @@ export function TransactionsPage() {
   const [range, setRange] = useState<[Dayjs, Dayjs] | null>(null)
   const [form] = Form.useForm<FormValues>()
   const selectedType = Form.useWatch('type', form)
+  const selectedAccountId = Form.useWatch('accountId', form)
+  const isTransfer = selectedType === 'TRANSFER'
 
   const params = range
     ? { from: range[0].format('YYYY-MM-DD'), to: range[1].format('YYYY-MM-DD') }
@@ -88,10 +104,21 @@ export function TransactionsPage() {
   )
 
   const filteredCategories = useMemo<Category[]>(() => {
-    if (!selectedType) return categories
+    if (!selectedType || selectedType === 'TRANSFER') return []
     const kind: CategoryKind = selectedType
     return categories.filter((c) => c.kind === kind)
   }, [categories, selectedType])
+
+  const sourceCurrency = selectedAccountId
+    ? accountMap.get(selectedAccountId)?.currency
+    : undefined
+
+  const transferTargetOptions = useMemo(() => {
+    if (!isTransfer) return []
+    return accounts
+      .filter((a) => a.id !== selectedAccountId && a.currency === sourceCurrency)
+      .map((a) => ({ value: a.id, label: `${a.name}（${a.currency}）` }))
+  }, [accounts, isTransfer, selectedAccountId, sourceCurrency])
 
   const invalidate = () => {
     qc.invalidateQueries({ queryKey: ['transactions'] })
@@ -147,7 +174,8 @@ export function TransactionsPage() {
     setEditing(t)
     form.setFieldsValue({
       accountId: t.accountId,
-      categoryId: t.categoryId,
+      toAccountId: t.toAccountId ?? undefined,
+      categoryId: t.categoryId ?? undefined,
       type: t.type,
       amount: t.amount,
       txnDate: dayjs(t.txnDate),
@@ -162,21 +190,32 @@ export function TransactionsPage() {
     form.resetFields()
   }
 
-  const onTypeChange = () => {
-    const currentCatId = form.getFieldValue('categoryId') as number | undefined
-    if (!currentCatId) return
-    const cat = categoryMap.get(currentCatId)
-    const desiredKind = form.getFieldValue('type') as TransactionType | undefined
-    if (cat && desiredKind && cat.kind !== desiredKind) {
+  const onTypeChange = (next: TransactionType) => {
+    if (next === 'TRANSFER') {
       form.setFieldsValue({ categoryId: undefined })
+    } else {
+      form.setFieldsValue({ toAccountId: undefined })
+      const currentCatId = form.getFieldValue('categoryId') as number | undefined
+      const cat = currentCatId ? categoryMap.get(currentCatId) : undefined
+      if (cat && cat.kind !== next) {
+        form.setFieldsValue({ categoryId: undefined })
+      }
+    }
+  }
+
+  const onAccountChange = () => {
+    if (isTransfer) {
+      form.setFieldsValue({ toAccountId: undefined })
     }
   }
 
   const onSubmit = async () => {
     const values = await form.validateFields()
+    const isTransferSubmit = values.type === 'TRANSFER'
     const body: TransactionInput = {
       accountId: values.accountId,
-      categoryId: values.categoryId,
+      toAccountId: isTransferSubmit ? values.toAccountId : undefined,
+      categoryId: isTransferSubmit ? undefined : values.categoryId,
       type: values.type,
       amount: values.amount,
       txnDate: values.txnDate.format('YYYY-MM-DD'),
@@ -207,15 +246,21 @@ export function TransactionsPage() {
     },
     {
       title: '帳戶',
-      dataIndex: 'accountId',
       key: 'accountId',
-      render: (id: number) => accountMap.get(id)?.name ?? `#${id}`,
+      render: (_, row) => {
+        const from = accountMap.get(row.accountId)?.name ?? `#${row.accountId}`
+        if (row.type === 'TRANSFER' && row.toAccountId != null) {
+          const to = accountMap.get(row.toAccountId)?.name ?? `#${row.toAccountId}`
+          return `${from} → ${to}`
+        }
+        return from
+      },
     },
     {
       title: '分類',
       dataIndex: 'categoryId',
       key: 'categoryId',
-      render: (id: number) => categoryMap.get(id)?.name ?? `#${id}`,
+      render: (id: number | null) => (id == null ? '—' : categoryMap.get(id)?.name ?? `#${id}`),
     },
     {
       title: '金額',
@@ -223,8 +268,8 @@ export function TransactionsPage() {
       key: 'amount',
       align: 'right',
       render: (v: number, row) => (
-        <span style={{ color: row.type === 'EXPENSE' ? '#cf1322' : '#3f8600' }}>
-          {row.type === 'EXPENSE' ? '-' : '+'}
+        <span style={{ color: amountColor[row.type] }}>
+          {amountSign[row.type]}
           {Number(v).toLocaleString(undefined, { minimumFractionDigits: 2 })}
         </span>
       ),
@@ -312,27 +357,47 @@ export function TransactionsPage() {
           </Form.Item>
           <Form.Item
             name="accountId"
-            label="帳戶"
+            label={isTransfer ? '來源帳戶' : '帳戶'}
             rules={[{ required: true, message: '請選擇帳戶' }]}
           >
             <Select
-              options={accounts.map((a) => ({ value: a.id, label: a.name }))}
-            />
-          </Form.Item>
-          <Form.Item
-            name="categoryId"
-            label="分類"
-            rules={[{ required: true, message: '請選擇分類' }]}
-          >
-            <Select
-              options={filteredCategories.map((c) => ({
-                value: c.id,
-                label: c.name,
+              onChange={onAccountChange}
+              options={accounts.map((a) => ({
+                value: a.id,
+                label: `${a.name}（${a.currency}）`,
               }))}
-              placeholder={selectedType ? undefined : '請先選擇類型'}
-              disabled={!selectedType}
             />
           </Form.Item>
+          {isTransfer ? (
+            <Form.Item
+              name="toAccountId"
+              label="目標帳戶"
+              rules={[{ required: true, message: '請選擇目標帳戶' }]}
+              extra={sourceCurrency ? `僅顯示同幣別（${sourceCurrency}）帳戶` : undefined}
+            >
+              <Select
+                options={transferTargetOptions}
+                placeholder={selectedAccountId ? undefined : '請先選擇來源帳戶'}
+                disabled={!selectedAccountId}
+                notFoundContent="沒有可轉入的同幣別帳戶"
+              />
+            </Form.Item>
+          ) : (
+            <Form.Item
+              name="categoryId"
+              label="分類"
+              rules={[{ required: true, message: '請選擇分類' }]}
+            >
+              <Select
+                options={filteredCategories.map((c) => ({
+                  value: c.id,
+                  label: c.name,
+                }))}
+                placeholder={selectedType ? undefined : '請先選擇類型'}
+                disabled={!selectedType}
+              />
+            </Form.Item>
+          )}
           <Form.Item
             name="amount"
             label="金額"

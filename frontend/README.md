@@ -1,73 +1,72 @@
-# React + TypeScript + Vite
+# FinanceHub Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React 19 + TypeScript + Vite + Ant Design 5 的單頁應用，對接 `../backend` 提供的 REST API。
 
-Currently, two official plugins are available:
+## 技術棧
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- React 19 / TypeScript 6（strict）
+- Vite 8（dev server + build）
+- Ant Design 5（UI）
+- TanStack Query 5（server state）
+- Zustand 5（auth state，persist 至 localStorage）
+- React Router 7（受保護路由）
+- axios（攔截器自動帶入 JWT、401 自動導回登入）
+- dayjs（日期）
 
-## React Compiler
+## 前置需求
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- Node.js 20+
+- 後端服務已啟動（預設 `http://localhost:8080`，由 `vite.config.ts` proxy `/api` 轉發）
 
-## Expanding the ESLint configuration
+## Quickstart
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install
+npm run dev          # http://localhost:5173
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+第一次使用：到 `/login` → 「註冊」分頁建立帳號 → 登入後自動導向 `/transactions`。
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## 可用指令
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+| 指令              | 用途                                  |
+| ----------------- | ------------------------------------- |
+| `npm run dev`     | 啟動 Vite dev server（含 HMR + proxy）|
+| `npm run build`   | `tsc -b` 型別檢查 + Vite production build |
+| `npm run lint`    | ESLint 全專案檢查                     |
+| `npm run preview` | 預覽 `dist/` build 產物               |
+
+## 目錄結構
+
 ```
+src/
+├── api/          # axios client + 各模組 API 函式 (auth, accounts, categories, transactions)
+├── components/   # 共用元件（AppLayout, ProtectedRoute）
+├── pages/        # 路由頁面（LoginPage, AccountsPage, TransactionsPage）
+├── store/        # Zustand stores（auth）
+├── types/        # TypeScript 型別定義
+├── App.tsx       # 路由設定
+└── main.tsx      # 進入點
+```
+
+別名：`@/*` → `src/*`（見 `vite.config.ts`）。
+
+## 與後端的串接
+
+- 開發環境：所有 `/api/*` 請求由 Vite 轉發到 `http://localhost:8080`
+- JWT 流程：登入後 token 存於 Zustand persist → axios `Authorization: Bearer <token>` → 401 攔截後清空 store 並導回 `/login`
+- 完整 API 規格見 `../docs-site/docs/api-reference/`
+
+## 部署 build
+
+```bash
+npm run build
+# dist/ 為靜態檔案，可直接交給任何靜態主機（Render Static Site / Nginx / S3）
+```
+
+production 環境需改寫 API base URL（目前由 dev proxy 解決，prod 走相對路徑或環境變數，預計 Sprint 7 上線時補上）。
+
+## 已知限制
+
+- AntD v5 與 React 19 仍有相容性 console warning（不影響功能）
+- 主 bundle 約 1.3 MB，尚未做 code splitting（Sprint 7 處理）

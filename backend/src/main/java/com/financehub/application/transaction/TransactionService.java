@@ -46,48 +46,110 @@ public class TransactionService {
     }
 
     @Transactional
-    public Transaction create(Long userId, Long accountId, Long categoryId, TransactionType type,
-                              BigDecimal amount, LocalDate txnDate, String note) {
-        Account account = requireAccount(userId, accountId);
-        Category category = requireCategory(userId, categoryId);
-        ensureKindMatchesType(category, type);
+    public Transaction create(Long userId, Long accountId, Long toAccountId, Long categoryId,
+                              TransactionType type, BigDecimal amount, LocalDate txnDate, String note) {
+        validateShape(type, accountId, toAccountId, categoryId);
 
-        Transaction txn = new Transaction(userId, accountId, categoryId, type, amount, txnDate, note);
+        Account fromAccount = requireAccount(userId, accountId);
+        Account toAccount = null;
+        if (type.isTransfer()) {
+            toAccount = requireAccount(userId, toAccountId);
+            ensureSameCurrency(fromAccount, toAccount);
+        } else {
+            Category category = requireCategory(userId, categoryId);
+            ensureKindMatchesType(category, type);
+        }
+
+        Transaction txn = new Transaction(userId, accountId,
+                type.isTransfer() ? toAccountId : null,
+                type.isTransfer() ? null : categoryId,
+                type, amount, txnDate, note);
         Transaction saved = transactionRepository.save(txn);
-        applyBalance(account, type.signedAmount(amount));
+        applyDelta(fromAccount, toAccount, type, amount);
         return saved;
     }
 
     @Transactional
-    public Transaction update(Long userId, Long id, Long accountId, Long categoryId,
+    public Transaction update(Long userId, Long id, Long accountId, Long toAccountId, Long categoryId,
                               TransactionType type, BigDecimal amount, LocalDate txnDate, String note) {
         Transaction txn = getForUser(userId, id);
-        Account oldAccount = requireAccount(userId, txn.getAccountId());
-        applyBalance(oldAccount, txn.getType().signedAmount(txn.getAmount()).negate());
+        rollbackBalances(userId, txn);
 
-        Account newAccount = txn.getAccountId().equals(accountId)
-                ? oldAccount
-                : requireAccount(userId, accountId);
-        Category category = requireCategory(userId, categoryId);
-        ensureKindMatchesType(category, type);
+        validateShape(type, accountId, toAccountId, categoryId);
+        Account fromAccount = requireAccount(userId, accountId);
+        Account toAccount = null;
+        if (type.isTransfer()) {
+            toAccount = requireAccount(userId, toAccountId);
+            ensureSameCurrency(fromAccount, toAccount);
+        } else {
+            Category category = requireCategory(userId, categoryId);
+            ensureKindMatchesType(category, type);
+        }
 
         txn.setAccountId(accountId);
-        txn.setCategoryId(categoryId);
+        txn.setToAccountId(type.isTransfer() ? toAccountId : null);
+        txn.setCategoryId(type.isTransfer() ? null : categoryId);
         txn.setType(type);
         txn.setAmount(amount);
         txn.setTxnDate(txnDate);
         txn.setNote(note);
 
-        applyBalance(newAccount, type.signedAmount(amount));
+        applyDelta(fromAccount, toAccount, type, amount);
         return txn;
     }
 
     @Transactional
     public void delete(Long userId, Long id) {
         Transaction txn = getForUser(userId, id);
-        Account account = requireAccount(userId, txn.getAccountId());
-        applyBalance(account, txn.getType().signedAmount(txn.getAmount()).negate());
+        rollbackBalances(userId, txn);
         transactionRepository.delete(txn);
+    }
+
+    private void rollbackBalances(Long userId, Transaction txn) {
+        Account from = requireAccount(userId, txn.getAccountId());
+        if (txn.getType().isTransfer()) {
+            Account to = requireAccount(userId, txn.getToAccountId());
+            applyBalance(from, txn.getAmount());
+            applyBalance(to, txn.getAmount().negate());
+        } else {
+            applyBalance(from, txn.getType().signedAmount(txn.getAmount()).negate());
+        }
+    }
+
+    private void applyDelta(Account from, Account to, TransactionType type, BigDecimal amount) {
+        if (type.isTransfer()) {
+            applyBalance(from, amount.negate());
+            applyBalance(to, amount);
+        } else {
+            applyBalance(from, type.signedAmount(amount));
+        }
+    }
+
+    private void validateShape(TransactionType type, Long accountId, Long toAccountId, Long categoryId) {
+        if (type.isTransfer()) {
+            if (toAccountId == null) {
+                throw new IllegalArgumentException("Transfer requires toAccountId");
+            }
+            if (toAccountId.equals(accountId)) {
+                throw new IllegalArgumentException("Transfer source and destination must differ");
+            }
+            if (categoryId != null) {
+                throw new IllegalArgumentException("Transfer must not have a category");
+            }
+        } else {
+            if (toAccountId != null) {
+                throw new IllegalArgumentException("Only transfers may set toAccountId");
+            }
+            if (categoryId == null) {
+                throw new IllegalArgumentException("Income/expense requires a category");
+            }
+        }
+    }
+
+    private void ensureSameCurrency(Account from, Account to) {
+        if (!from.getCurrency().equals(to.getCurrency())) {
+            throw new IllegalArgumentException("Cross-currency transfer not supported");
+        }
     }
 
     private Account requireAccount(Long userId, Long accountId) {

@@ -19,7 +19,7 @@ export function LoginPage() {
 
   const redirectTo =
     (location.state as { from?: { pathname?: string } } | null)?.from?.pathname
-    ?? '/accounts'
+    ?? '/transactions'
 
   const handleLogin = async (values: LoginValues) => {
     setLoading(true)
@@ -42,7 +42,7 @@ export function LoginPage() {
       const data = await register(values)
       setAuth(data)
       message.success('註冊成功，已自動登入')
-      navigate('/accounts', { replace: true })
+      navigate('/transactions', { replace: true })
     } catch (e) {
       const err = e as AxiosError<{ detail?: string }>
       message.error(err.response?.data?.detail ?? '註冊失敗')

@@ -17,7 +17,8 @@ public final class TransactionDtos {
 
     public record CreateTransactionRequest(
             @NotNull Long accountId,
-            @NotNull Long categoryId,
+            Long toAccountId,
+            Long categoryId,
             @NotNull TransactionType type,
             @NotNull @DecimalMin(value = "0.01", message = "must be positive") BigDecimal amount,
             @NotNull LocalDate txnDate,
@@ -27,7 +28,8 @@ public final class TransactionDtos {
 
     public record UpdateTransactionRequest(
             @NotNull Long accountId,
-            @NotNull Long categoryId,
+            Long toAccountId,
+            Long categoryId,
             @NotNull TransactionType type,
             @NotNull @DecimalMin(value = "0.01", message = "must be positive") BigDecimal amount,
             @NotNull LocalDate txnDate,
@@ -38,6 +40,7 @@ public final class TransactionDtos {
     public record TransactionResponse(
             Long id,
             Long accountId,
+            Long toAccountId,
             Long categoryId,
             TransactionType type,
             BigDecimal amount,
@@ -47,8 +50,8 @@ public final class TransactionDtos {
             OffsetDateTime updatedAt
     ) {
         public static TransactionResponse from(Transaction t) {
-            return new TransactionResponse(t.getId(), t.getAccountId(), t.getCategoryId(),
-                    t.getType(), t.getAmount(), t.getTxnDate(), t.getNote(),
+            return new TransactionResponse(t.getId(), t.getAccountId(), t.getToAccountId(),
+                    t.getCategoryId(), t.getType(), t.getAmount(), t.getTxnDate(), t.getNote(),
                     t.getCreatedAt(), t.getUpdatedAt());
         }
     }

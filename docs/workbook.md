@@ -4,7 +4,7 @@
 > 詳細設計請見 [`plan.md`](./plan.md)；Sprint 任務藍圖請見 [`sprint-tasks-s0-s2.md`](./sprint-tasks-s0-s2.md)。
 
 - 最近更新：2026-06-18
-- 目前位置：**Sprint 2（交易紀錄完成，前後端皆綠）**
+- 目前位置：**Sprint 2.5（TRANSFER 轉帳完成，前後端皆綠）**
 - GitHub Repo：[dreamerasleep/financehub](https://github.com/dreamerasleep/financehub)（public）
 
 ---
@@ -16,6 +16,7 @@
 | S0 | W1 | 基礎建設 / Bootstrap | ✅ 完成 |
 | S1 | W2–3 | 使用者驗證 + 帳戶 CRUD | ✅ 完成（前後端） |
 | S2 | W4–5 | 交易紀錄 + 手動輸入 | ✅ 完成（前後端） |
+| S2.5 | W5 尾 | 轉帳交易（同幣別） | ✅ 完成（前後端） |
 | S3 | W6–7 | CSV / Excel 匯入 | ⏳ 規劃中 |
 | S4 | W8–9 | 收據 OCR | ⏳ 規劃中 |
 | S5 | W10–11 | 公開 API 整合（匯率 / 股價） | ⏳ 規劃中 |
@@ -75,7 +76,7 @@
 
 ## 3. 進行中（In progress）
 
-目前**無**進行中項目。下一步：F-07（`frontend/README.md` Quickstart）或 Sprint 3（CSV/Excel 匯入）。
+目前**無**進行中項目。下一步：Sprint 3（CSV/Excel 匯入）。
 
 ---
 
@@ -89,7 +90,7 @@
 - [x] **F-04**：登入頁、註冊頁
 - [x] **F-05**：帳戶列表頁（受保護路由 + AntD Table + 新增/編輯/刪除 modal）
 - [x] **F-06**：`.github/workflows/frontend-ci.yml`（lint + typecheck + build）
-- [ ] **F-07**：前端 README 與啟動指令（待補）
+- [x] **F-07**：前端 README 與啟動指令（`frontend/README.md` 含 Quickstart、scripts、目錄結構、proxy 說明、已知限制）
 
 ### Sprint 2 — 交易紀錄 + 手動輸入
 
@@ -99,7 +100,7 @@
 - [x] **T-04**：交易 IT 測試 6 個（CRUD、餘額同步、編輯/刪除回滾、kind 不符 400、跨使用者 404、未驗證 401）
 - [x] **T-05**：前端 `/transactions` 頁（列表 + 區間 filter + CRUD modal + Popconfirm）
 - [x] **T-06**：分類 API（`GET /api/v1/categories`，種子 4 INCOME + 7 EXPENSE）
-- [ ] **T-07**：轉帳交易（同使用者跨帳戶，延後到 Sprint 2.5）
+- [x] **T-07**：轉帳交易（單筆 + `to_account_id`、同幣別、雙邊餘額同步）→ Sprint 2.5 完成；跨幣別待 Sprint 5 匯率服務
 
 ### Sprint 3 — CSV / Excel 匯入
 
@@ -164,6 +165,21 @@
 ## 6. 進度日誌（Changelog）
 
 > 每次告一段落時新增一筆條目（最新在最上方）。
+
+### 2026-06-18 — Sprint 2.5 完成（TRANSFER 轉帳）
+
+- 後端：Flyway V3 加 `transactions.to_account_id`、`category_id` 改 NULL、`type` CHECK 加 `TRANSFER`、新增 `chk_transactions_transfer_shape` 跨欄位約束
+- `TransactionService` 重構支援 TRANSFER：`@Transactional` 內同步「來源 −amount、目標 +amount」，update / delete 會還原雙邊舊金額再套新值
+- 形狀驗證：拒絕 from == to、跨幣別、誤帶 categoryId、TRANSFER 缺 toAccountId 等
+- DTO 與 controller 加 `toAccountId` 欄位（INCOME/EXPENSE 仍向後相容）
+- 新增 `TransactionTransferIT`（6 案）：成功、編輯切換目標雙邊同步、刪除回滾、same account 400、跨幣別 400、跨使用者 404
+- 後端測試全綠：**20/20**（原 14 + 新 6）
+- 前端：類型選單加「轉帳」；轉帳模式隱藏分類欄位、顯示「目標帳戶」下拉（自動過濾同幣別、排除來源帳戶）
+- 列表「帳戶」欄位轉帳顯示「來源 → 目標」；金額不帶正負號、改藍色
+- 帳戶頁兩端餘額即時反映（既有 `accounts` invalidate 已涵蓋）
+- LoginPage 預設導向 `/accounts` → `/transactions`（保留 `from.pathname` fallback）
+- F-07 `frontend/README.md` 補完（Quickstart、scripts、目錄結構、proxy、已知限制）
+- 文件：`api-reference/transactions.md`、`architecture/database.md`、`user-guide/transactions.md`、`changelog.md`、`index.md` 同步更新；`mkdocs build --strict` 通過
 
 ### 2026-06-18 — Sprint 2 完成
 

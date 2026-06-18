@@ -42,8 +42,8 @@ public class TransactionController {
     public ResponseEntity<TransactionDtos.TransactionResponse> create(
             @AuthenticationPrincipal AuthenticatedUser user,
             @Valid @RequestBody TransactionDtos.CreateTransactionRequest request) {
-        Transaction txn = transactionService.create(user.id(), request.accountId(), request.categoryId(),
-                request.type(), request.amount(), request.txnDate(), request.note());
+        Transaction txn = transactionService.create(user.id(), request.accountId(), request.toAccountId(),
+                request.categoryId(), request.type(), request.amount(), request.txnDate(), request.note());
         return ResponseEntity.status(201).body(TransactionDtos.TransactionResponse.from(txn));
     }
 
@@ -52,8 +52,8 @@ public class TransactionController {
             @AuthenticationPrincipal AuthenticatedUser user,
             @PathVariable Long id,
             @Valid @RequestBody TransactionDtos.UpdateTransactionRequest request) {
-        Transaction txn = transactionService.update(user.id(), id, request.accountId(), request.categoryId(),
-                request.type(), request.amount(), request.txnDate(), request.note());
+        Transaction txn = transactionService.update(user.id(), id, request.accountId(), request.toAccountId(),
+                request.categoryId(), request.type(), request.amount(), request.txnDate(), request.note());
         return TransactionDtos.TransactionResponse.from(txn);
     }
 
