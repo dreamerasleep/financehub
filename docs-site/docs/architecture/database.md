@@ -3,35 +3,17 @@
 ## 整體 ER 圖
 
 ```
-┌─────────────────────────┐
-│        users            │
-├─────────────────────────┤
-│ id           BIGSERIAL  │◄─┐
-│ email        UNIQUE     │  │
-│ name                    │  │
-│ password_hash           │  │
-│ created_at              │  │
-│ updated_at              │  │
-└─────────────────────────┘  │
-                             │ FK (ON DELETE CASCADE)
-                             │
-┌─────────────────────────┐  │
-│       accounts          │  │
-├─────────────────────────┤  │
-│ id           BIGSERIAL  │  │
-│ user_id      → users.id │──┘
-│ name                    │
-│ type         (CHECK)    │
-│ currency     VARCHAR(3) │
-│ current_balance         │
-│ created_at              │
-│ updated_at              │
-└─────────────────────────┘
+users ─┬─< accounts ─┐
+       │             │
+       └─< categories │  (user_id 可為 NULL = 系統分類)
+       │             ▼
+       └─< transactions ──> accounts
+                       └──> categories
 ```
 
+`transactions` 同時參照 `accounts` 與 `categories`；`categories.user_id` 為 NULL 代表系統預設分類，全使用者共用。
+
 未來會加：
-- `transactions` (Sprint 2)
-- `categories` (Sprint 2)
 - `import_jobs` (Sprint 3)
 - `receipts` (Sprint 4)
 - `fx_rates`, `stock_quotes` (Sprint 5)
@@ -73,6 +55,42 @@
 | `updated_at` | `TIMESTAMPTZ` | NOT NULL, default `now()` | |
 
 索引：`idx_accounts_user_id` on `user_id`
+
+### `categories` (V2)
+
+| 欄位 | 型別 | 限制 | 說明 |
+| ---- | ---- | ---- | ---- |
+| `id` | `BIGSERIAL` | PK | |
+| `user_id` | `BIGINT` | NULL 表示系統分類；非 NULL 時 FK → `users.id` ON DELETE CASCADE | 擁有者 |
+| `name` | `VARCHAR(60)` | NOT NULL | 顯示名稱 |
+| `kind` | `VARCHAR(10)` | NOT NULL, CHECK | `INCOME` / `EXPENSE` |
+| `is_system` | `BOOLEAN` | NOT NULL, default `FALSE` | 是否為內建分類 |
+
+額外約束：
+- `chk_categories_owner`：`is_system=TRUE` 須配合 `user_id IS NULL`，反之亦然
+- 唯一索引：系統分類 `(name, kind)` 唯一；使用者分類 `(user_id, name, kind)` 唯一
+- 種子：V2 migration 寫入 4 個 INCOME + 7 個 EXPENSE 預設分類
+
+### `transactions` (V2)
+
+| 欄位 | 型別 | 限制 | 說明 |
+| ---- | ---- | ---- | ---- |
+| `id` | `BIGSERIAL` | PK | |
+| `user_id` | `BIGINT` | NOT NULL, FK → `users.id` ON DELETE CASCADE | 擁有者 |
+| `account_id` | `BIGINT` | NOT NULL, FK → `accounts.id` ON DELETE CASCADE | 影響哪個帳戶 |
+| `category_id` | `BIGINT` | NOT NULL, FK → `categories.id` ON DELETE RESTRICT | 分類 |
+| `type` | `VARCHAR(10)` | NOT NULL, CHECK | `INCOME` / `EXPENSE` |
+| `amount` | `NUMERIC(18,2)` | NOT NULL, CHECK `amount > 0` | 絕對值，方向由 `type` 決定 |
+| `txn_date` | `DATE` | NOT NULL | 交易日 |
+| `note` | `VARCHAR(255)` | NULL | 備註 |
+| `created_at` / `updated_at` | `TIMESTAMPTZ` | NOT NULL, default `now()` | |
+
+索引：
+- `idx_transactions_user_id` on `user_id`
+- `idx_transactions_account_id` on `account_id`
+- `idx_transactions_user_date` on `(user_id, txn_date DESC)`（列表頁主要查詢）
+
+餘額同步：`TransactionService` 在 `@Transactional` 內同時寫入交易並調整 `accounts.current_balance`，更新 / 刪除前會先還原舊金額。
 
 ## 設計取捨
 

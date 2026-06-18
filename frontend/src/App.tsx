@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { LoginPage } from '@/pages/LoginPage'
 import { AccountsPage } from '@/pages/AccountsPage'
+import { TransactionsPage } from '@/pages/TransactionsPage'
 import { ProtectedRoute } from '@/components/ProtectedRoute'
 import { AppLayout } from '@/components/AppLayout'
 
@@ -22,7 +23,8 @@ function App() {
             <Route element={<ProtectedRoute />}>
               <Route element={<AppLayout />}>
                 <Route path="/accounts" element={<AccountsPage />} />
-                <Route path="/" element={<Navigate to="/accounts" replace />} />
+                <Route path="/transactions" element={<TransactionsPage />} />
+                <Route path="/" element={<Navigate to="/transactions" replace />} />
               </Route>
             </Route>
 

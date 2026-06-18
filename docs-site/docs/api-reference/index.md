@@ -22,6 +22,12 @@
 | POST | `/api/v1/accounts` | 須驗證 | 新增帳戶 |
 | PUT  | `/api/v1/accounts/{id}` | 須驗證 | 更新帳戶 |
 | DELETE | `/api/v1/accounts/{id}` | 須驗證 | 刪除帳戶 |
+| GET    | `/api/v1/categories` | 須驗證 | 列出可見分類（系統 + 自訂） |
+| GET    | `/api/v1/transactions` | 須驗證 | 列出交易（可帶 `from` / `to` 過濾） |
+| GET    | `/api/v1/transactions/{id}` | 須驗證 | 取得單筆交易 |
+| POST   | `/api/v1/transactions` | 須驗證 | 新增交易 |
+| PUT    | `/api/v1/transactions/{id}` | 須驗證 | 更新交易 |
+| DELETE | `/api/v1/transactions/{id}` | 須驗證 | 刪除交易 |
 
 ## 互動式文件
 
@@ -34,6 +40,7 @@
 
 - [驗證 API](auth.md)
 - [帳戶 API](accounts.md)
+- [交易 API](transactions.md)
 
 ## HTTP 狀態碼慣例
 

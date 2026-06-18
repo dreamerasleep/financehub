@@ -1,5 +1,5 @@
 import { Layout, Menu, Button, Space, Typography } from 'antd'
-import { LogoutOutlined, BankOutlined } from '@ant-design/icons'
+import { LogoutOutlined, BankOutlined, SwapOutlined } from '@ant-design/icons'
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { useAuthStore } from '@/store/auth'
 
@@ -29,6 +29,11 @@ export function AppLayout() {
               key: '/accounts',
               icon: <BankOutlined />,
               label: <Link to="/accounts">帳戶</Link>,
+            },
+            {
+              key: '/transactions',
+              icon: <SwapOutlined />,
+              label: <Link to="/transactions">交易</Link>,
             },
           ]}
           style={{ flex: 1, minWidth: 0, background: 'transparent' }}

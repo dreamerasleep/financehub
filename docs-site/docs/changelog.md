@@ -6,7 +6,24 @@
 
 ---
 
-## [Unreleased] — Sprint 1 完成
+## [Unreleased] — Sprint 2 完成
+
+### 新增（後端）
+- Flyway V2 migration：`categories`、`transactions`、11 個系統分類種子
+- 交易 CRUD API（`/api/v1/transactions` GET/POST/PUT/DELETE、`from`/`to` 日期過濾）
+- 分類列出 API（`GET /api/v1/categories`，系統 + 自訂）
+- `TransactionService` 在 `@Transactional` 內同步更新帳戶 `current_balance`，編輯 / 刪除會先還原再套用
+- 後端整合測試 14/14 全綠（原 8 + 新增 6）
+
+### 新增（前端）
+- 交易列表頁（`/transactions`，依日期排序、type 顏色標籤、日期區間 filter）
+- 新增 / 編輯 modal：類型 → 帳戶 → 分類（kind 連動）→ 金額 → 日期 → 備註
+- 帳戶頁餘額即時反映交易變更
+- 導覽列加上「交易」入口，預設首頁改 `/transactions`
+
+---
+
+## [0.2.0] — 2026-06-17 — Sprint 1 前端完成
 
 ### 新增（前端）
 - React 19 + Vite 8 + TypeScript 6 + Ant Design 5 骨架

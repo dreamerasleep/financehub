@@ -79,6 +79,7 @@ nav:
       - user-guide/index.md
       - 註冊與登入: user-guide/auth.md
       - 帳戶管理: user-guide/accounts.md
+      - 交易紀錄: user-guide/transactions.md
   - 系統架構:
       - architecture/index.md
       - 整體架構: architecture/overview.md
@@ -90,6 +91,7 @@ nav:
       - api-reference/index.md
       - 驗證 API: api-reference/auth.md
       - 帳戶 API: api-reference/accounts.md
+      - 交易 API: api-reference/transactions.md
   - 維運手冊:
       - operations/index.md
       - 本機開發: operations/local-dev.md

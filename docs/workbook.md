@@ -3,9 +3,9 @@
 > 本檔為**單一狀態真相來源**。每完成一段工作後即時更新「進度日誌」與下方任務狀態。
 > 詳細設計請見 [`plan.md`](./plan.md)；Sprint 任務藍圖請見 [`sprint-tasks-s0-s2.md`](./sprint-tasks-s0-s2.md)。
 
-- 最近更新：2026-06-17
-- 目前位置：**Sprint 1（後端完成，前端待開工）**
-- GitHub Repo：[dreamerasleep/financehub](https://github.com/dreamerasleep/financehub)（private）
+- 最近更新：2026-06-18
+- 目前位置：**Sprint 2（交易紀錄完成，前後端皆綠）**
+- GitHub Repo：[dreamerasleep/financehub](https://github.com/dreamerasleep/financehub)（public）
 
 ---
 
@@ -15,7 +15,7 @@
 | ------ | ---- | ---- | ---- |
 | S0 | W1 | 基礎建設 / Bootstrap | ✅ 完成 |
 | S1 | W2–3 | 使用者驗證 + 帳戶 CRUD | ✅ 完成（前後端） |
-| S2 | W4–5 | 交易紀錄 + 手動輸入 | ⏳ 規劃中 |
+| S2 | W4–5 | 交易紀錄 + 手動輸入 | ✅ 完成（前後端） |
 | S3 | W6–7 | CSV / Excel 匯入 | ⏳ 規劃中 |
 | S4 | W8–9 | 收據 OCR | ⏳ 規劃中 |
 | S5 | W10–11 | 公開 API 整合（匯率 / 股價） | ⏳ 規劃中 |
@@ -75,7 +75,7 @@
 
 ## 3. 進行中（In progress）
 
-目前**無**進行中項目（等待使用者裁示是否進入前端開發）。
+目前**無**進行中項目。下一步：F-07（`frontend/README.md` Quickstart）或 Sprint 3（CSV/Excel 匯入）。
 
 ---
 
@@ -93,12 +93,13 @@
 
 ### Sprint 2 — 交易紀錄 + 手動輸入
 
-- [ ] **T-01**：`transactions` table migration（amount / type / category / occurred_at / note / account_id FK）
-- [ ] **T-02**：JPA 實體 + Repository + 餘額自動更新（事務性）
-- [ ] **T-03**：交易 CRUD API（含分頁、日期範圍查詢、分類查詢）
-- [ ] **T-04**：交易 IT 測試（含跨使用者隔離、餘額同步驗證）
-- [ ] **T-05**：前端交易頁面（清單 + 新增 modal + 篩選）
-- [ ] **T-06**：分類（categories）種子資料與管理 API
+- [x] **T-01**：`V2__transactions_and_categories.sql`（INCOME/EXPENSE + 11 個系統分類）
+- [x] **T-02**：JPA 實體 + Repository + 餘額自動更新（`TransactionService` @Transactional）
+- [x] **T-03**：交易 CRUD API（`/api/v1/transactions`，`from`/`to` 日期過濾）
+- [x] **T-04**：交易 IT 測試 6 個（CRUD、餘額同步、編輯/刪除回滾、kind 不符 400、跨使用者 404、未驗證 401）
+- [x] **T-05**：前端 `/transactions` 頁（列表 + 區間 filter + CRUD modal + Popconfirm）
+- [x] **T-06**：分類 API（`GET /api/v1/categories`，種子 4 INCOME + 7 EXPENSE）
+- [ ] **T-07**：轉帳交易（同使用者跨帳戶，延後到 Sprint 2.5）
 
 ### Sprint 3 — CSV / Excel 匯入
 
@@ -156,12 +157,30 @@
 | R2 | 股價 API | Yahoo 非官方易壞 / Alpha Vantage 限額嚴 | Sprint 5 前需決定 |
 | R3 | Render 等級 | Free tier 會 sleep；$7 Starter 才常駐 | 部署前確認預算 |
 | R4 | OAuth / SSO | 是否導入 Google 登入？| 視個人使用便利性 |
+| R5 | JWT 存 localStorage | XSS 可竊（push 後 security review MEDIUM）| Sprint 7 上線前換 httpOnly Cookie + refresh token |
 
 ---
 
 ## 6. 進度日誌（Changelog）
 
 > 每次告一段落時新增一筆條目（最新在最上方）。
+
+### 2026-06-18 — Sprint 2 完成
+
+- 後端：Flyway V2 加 `categories` + `transactions`，11 個系統分類種子
+- 新增 `TransactionService`（@Transactional 同步 `accounts.current_balance`，編輯/刪除回滾舊金額）
+- 新增 `CategoryService` 與 `CategoryController`（系統 + 自訂分類列表）
+- `TransactionController` 提供 CRUD + `from`/`to` 日期區間過濾
+- 整合測試 `TransactionCrudIT` 6 個案例：CRUD、餘額同步、編輯/刪除回滾、kind 不符 400、跨使用者 404、未驗證 401
+- 後端測試全綠：**14/14**（原 8 + 新 6）
+- 前端：`/transactions` 頁（列表 + 區間 filter + CRUD modal + Popconfirm）
+- 表單 type 切換時自動清空不符 kind 的分類值
+- 帳戶頁餘額即時反映交易變更（invalidate `accounts` query）
+- 導覽列新增「交易」入口；預設首頁改 `/transactions`
+- lint + tsc + vite build 全綠（bundle 1.31 MB，仍待 code-split）
+- 新增 R5 風險：JWT 存 localStorage，計畫 Sprint 7 換 httpOnly Cookie
+- 同步更新 `docs-site/`：新增 `user-guide/transactions.md` 與 `api-reference/transactions.md`、更新資料庫設計、API 索引、首頁、changelog、mkdocs nav
+- **下一步**：F-07 README 或 Sprint 3（CSV / Excel 匯入）
 
 ### 2026-06-17（夜段） — Sprint 1 前端完成
 
