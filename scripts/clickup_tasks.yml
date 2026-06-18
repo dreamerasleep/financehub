@@ -1,0 +1,411 @@
+# FinanceHub — ClickUp Sprint Task Tracker
+#
+# 更新進度方式：
+#   1. 修改 tasks 底下的 status 欄位
+#   2. 執行 python3 scripts/clickup_sync.py
+#
+# 可用 status：Backlog | To Do | In Progress | In Review | Done | Blocked
+# 可用 epic：Infra | PM | 系統功能 | 交易管理 | 分類與標籤 | 儀表板 | 預算管理 | 報表與匯出
+# 可用 tech_area：後端 | 前端 | 基礎設施 | 文件 | AI 協作
+
+meta:
+  space_name: "Development"
+
+# ─────────────────────────────────────────────────────────────────────
+# Sprint 0 — 基礎建設（Week 1–2）
+# ─────────────────────────────────────────────────────────────────────
+sprints:
+  - key: S0
+    list_name: "S0 基礎建設"
+    start: "2026-06-17"
+    end: "2026-06-30"
+    tasks:
+      - id: S0-T01
+        name: "S0-T01 建立 GitHub Monorepo (backend + frontend)"
+        epic: Infra
+        tech_area: 基礎設施
+        story_points: 1
+        feature_id: ""
+        status: Done
+        start: "2026-06-16"
+        due: "2026-06-16"
+        ac: "repo 已建立、main 分支已 push"
+
+      - id: S0-T02
+        name: "S0-T02 安裝 Java 21 + Maven Wrapper"
+        epic: Infra
+        tech_area: 後端
+        story_points: 1
+        feature_id: ""
+        status: Done
+        start: "2026-06-16"
+        due: "2026-06-16"
+        ac: "./mvnw -v 成功；CI 使用 Java 21"
+
+      - id: S0-T03
+        name: "S0-T03 Spring Boot 3.3 骨架 + Health endpoint"
+        epic: Infra
+        tech_area: 後端
+        story_points: 2
+        feature_id: ""
+        status: Done
+        start: "2026-06-16"
+        due: "2026-06-16"
+        ac: "/actuator/health 回 200；./mvnw test 通過"
+
+      - id: S0-T04
+        name: "S0-T04 GitHub Actions CI（後端測試 + lint）"
+        epic: Infra
+        tech_area: 基礎設施
+        story_points: 2
+        feature_id: ""
+        status: Done
+        start: "2026-06-16"
+        due: "2026-06-16"
+        ac: "push 後 CI 綠燈"
+
+      - id: S0-T05
+        name: "S0-T05 Docker 化後端 + 本地 docker-compose（含 Postgres 16）"
+        epic: Infra
+        tech_area: 基礎設施
+        story_points: 3
+        feature_id: ""
+        status: To Do
+        start: "2026-06-17"
+        due: "2026-06-18"
+        ac: "docker compose up 起得來、能連 DB"
+
+      - id: S0-T06
+        name: "S0-T06 Flyway 設定 + 第一支 migration（users 表骨架）"
+        epic: Infra
+        tech_area: 後端
+        story_points: 2
+        feature_id: ""
+        status: To Do
+        start: "2026-06-17"
+        due: "2026-06-18"
+        ac: "flyway:migrate 通過"
+
+      - id: S0-T07
+        name: "S0-T07 Render 帳號 + Web Service + Postgres 連線"
+        epic: Infra
+        tech_area: 基礎設施
+        story_points: 3
+        feature_id: ""
+        status: To Do
+        start: "2026-06-19"
+        due: "2026-06-20"
+        ac: "Render 部署成功；/actuator/health 可外連"
+
+      - id: S0-T08
+        name: "S0-T08 Vite + React 18 + TS + Ant Design 骨架"
+        epic: Infra
+        tech_area: 前端
+        story_points: 2
+        feature_id: ""
+        status: To Do
+        start: "2026-06-19"
+        due: "2026-06-20"
+        ac: "npm run dev 啟動成功；Hello FinanceHub 頁可見"
+
+      - id: S0-T09
+        name: "S0-T09 前端 ESLint + Prettier + Vitest 工具鏈"
+        epic: Infra
+        tech_area: 前端
+        story_points: 1
+        feature_id: ""
+        status: To Do
+        start: "2026-06-19"
+        due: "2026-06-20"
+        ac: "npm run lint、npm run test 通過"
+
+      - id: S0-T10
+        name: "S0-T10 ClickUp Workspace + Sprint Lists + 自訂欄位"
+        epic: PM
+        tech_area: 基礎設施
+        story_points: 1
+        feature_id: ""
+        status: In Progress
+        start: "2026-06-17"
+        due: "2026-06-20"
+        ac: "8 個 Sprint List 建好；自訂欄位齊全"
+
+      - id: S0-T11
+        name: "S0-T11 docs/ 文件補齊（README、架構圖、PR 模板）"
+        epic: PM
+        tech_area: 文件
+        story_points: 2
+        feature_id: ""
+        status: To Do
+        start: "2026-06-23"
+        due: "2026-06-27"
+        ac: "README 有跑通指令；PR template 啟用"
+
+# ─────────────────────────────────────────────────────────────────────
+# Sprint 1 — 認證 + 帳戶（Week 3–4）
+# ─────────────────────────────────────────────────────────────────────
+  - key: S1
+    list_name: "S1 認證+帳戶"
+    start: "2026-07-01"
+    end: "2026-07-14"
+    tasks:
+      - id: S1-T01
+        name: "S1-T01 User Entity + UserRepository + Flyway migration"
+        epic: 系統功能
+        tech_area: 後端
+        story_points: 2
+        feature_id: "F-050"
+        status: Backlog
+        start: "2026-07-01"
+        due: "2026-07-02"
+        ac: "建表成功；單元測試覆蓋 Repository"
+
+      - id: S1-T02
+        name: "S1-T02 Spring Security 設定 + PasswordEncoder"
+        epic: 系統功能
+        tech_area: 後端
+        story_points: 3
+        feature_id: "F-050"
+        status: Backlog
+        start: "2026-07-01"
+        due: "2026-07-03"
+        ac: "SecurityFilterChain 設定通過；bcrypt 編碼可用"
+
+      - id: S1-T03
+        name: "S1-T03 JWT 簽發/驗證模組（access + refresh）"
+        epic: 系統功能
+        tech_area: 後端
+        story_points: 3
+        feature_id: "F-050"
+        status: Backlog
+        start: "2026-07-03"
+        due: "2026-07-05"
+        ac: "token 簽發、解碼、過期測試通過"
+
+      - id: S1-T04
+        name: "S1-T04 POST /api/auth/register API"
+        epic: 系統功能
+        tech_area: 後端
+        story_points: 2
+        feature_id: "F-050"
+        status: Backlog
+        start: "2026-07-05"
+        due: "2026-07-06"
+        ac: "整合測試：註冊成功、重複 email 回 409"
+
+      - id: S1-T05
+        name: "S1-T05 POST /api/auth/login API（回 access+refresh token）"
+        epic: 系統功能
+        tech_area: 後端
+        story_points: 2
+        feature_id: "F-050"
+        status: Backlog
+        start: "2026-07-06"
+        due: "2026-07-07"
+        ac: "帳密正確 200、錯誤 401；測試通過"
+
+      - id: S1-T06
+        name: "S1-T06 POST /api/auth/refresh API"
+        epic: 系統功能
+        tech_area: 後端
+        story_points: 1
+        feature_id: "F-050"
+        status: Backlog
+        start: "2026-07-07"
+        due: "2026-07-07"
+        ac: "refresh token 換新 access token"
+
+      - id: S1-T07
+        name: "S1-T07 Account Entity + Flyway migration"
+        epic: 交易管理
+        tech_area: 後端
+        story_points: 1
+        feature_id: ""
+        status: Backlog
+        start: "2026-07-07"
+        due: "2026-07-08"
+        ac: "accounts 表建立；FK to users"
+
+      - id: S1-T08
+        name: "S1-T08 Account CRUD API（含 user_id 隔離）"
+        epic: 交易管理
+        tech_area: 後端
+        story_points: 3
+        feature_id: ""
+        status: Backlog
+        start: "2026-07-08"
+        due: "2026-07-10"
+        ac: "5 個端點 + 整合測試；他人帳戶 404"
+
+      - id: S1-T09
+        name: "S1-T09 Springdoc OpenAPI 設定 + /swagger-ui"
+        epic: 系統功能
+        tech_area: 後端
+        story_points: 1
+        feature_id: ""
+        status: Backlog
+        start: "2026-07-08"
+        due: "2026-07-08"
+        ac: "Swagger UI 看得到所有 Auth/Account 端點"
+
+      - id: S1-T10
+        name: "S1-T10 前端 Login 頁 + JWT 儲存（zustand）"
+        epic: 系統功能
+        tech_area: 前端
+        story_points: 3
+        feature_id: "F-050"
+        status: Backlog
+        start: "2026-07-10"
+        due: "2026-07-12"
+        ac: "登入成功跳轉、token 存進 store"
+
+      - id: S1-T11
+        name: "S1-T11 前端 Axios interceptor（自動加 Bearer + 401 處理）"
+        epic: 系統功能
+        tech_area: 前端
+        story_points: 2
+        feature_id: "F-050"
+        status: Backlog
+        start: "2026-07-12"
+        due: "2026-07-13"
+        ac: "401 自動嘗試 refresh 或登出"
+
+      - id: S1-T12
+        name: "S1-T12 前端 Account 列表頁 + 新增/編輯 Modal"
+        epic: 交易管理
+        tech_area: 前端
+        story_points: 1
+        feature_id: ""
+        status: Backlog
+        start: "2026-07-13"
+        due: "2026-07-14"
+        ac: "列表顯示、Modal 新增成功後刷新"
+
+# ─────────────────────────────────────────────────────────────────────
+# Sprint 2 — 交易核心（Week 5–6）
+# ─────────────────────────────────────────────────────────────────────
+  - key: S2
+    list_name: "S2 交易核心"
+    start: "2026-07-15"
+    end: "2026-07-28"
+    tasks:
+      - id: S2-T01
+        name: "S2-T01 Category Entity + 預設分類樹 seed"
+        epic: 分類與標籤
+        tech_area: 後端
+        story_points: 3
+        feature_id: "F-010"
+        status: Backlog
+        start: "2026-07-15"
+        due: "2026-07-17"
+        ac: "預設分類 seed migration 跑成功"
+
+      - id: S2-T02
+        name: "S2-T02 Category CRUD API（含父子層級）"
+        epic: 分類與標籤
+        tech_area: 後端
+        story_points: 3
+        feature_id: "F-010,F-011"
+        status: Backlog
+        start: "2026-07-17"
+        due: "2026-07-19"
+        ac: "樹狀查詢端點；不可刪有交易的分類"
+
+      - id: S2-T03
+        name: "S2-T03 Transaction Entity + Flyway migration（含 tags jsonb）"
+        epic: 交易管理
+        tech_area: 後端
+        story_points: 2
+        feature_id: "F-001"
+        status: Backlog
+        start: "2026-07-15"
+        due: "2026-07-16"
+        ac: "表建立；tags 用 jsonb"
+
+      - id: S2-T04
+        name: "S2-T04 Transaction CRUD API（含類別/帳戶/標籤校驗）"
+        epic: 交易管理
+        tech_area: 後端
+        story_points: 4
+        feature_id: "F-001,F-002"
+        status: Backlog
+        start: "2026-07-19"
+        due: "2026-07-22"
+        ac: "5 個端點；單元 + 整合測試通過"
+
+      - id: S2-T05
+        name: "S2-T05 Transaction 查詢 API（分頁/排序/日期範圍/類別/標籤篩選）"
+        epic: 交易管理
+        tech_area: 後端
+        story_points: 4
+        feature_id: "F-001"
+        status: Backlog
+        start: "2026-07-22"
+        due: "2026-07-24"
+        ac: "Pageable + Specification；測試覆蓋多組條件"
+
+      - id: S2-T06
+        name: "S2-T06 帳戶餘額即時更新（DomainEvent + Listener）"
+        epic: 交易管理
+        tech_area: 後端
+        story_points: 3
+        feature_id: ""
+        status: Backlog
+        start: "2026-07-24"
+        due: "2026-07-25"
+        ac: "新增/刪除交易後餘額正確；併發測試通過"
+
+      - id: S2-T07
+        name: "S2-T07 前端 Category 樹狀管理頁"
+        epic: 分類與標籤
+        tech_area: 前端
+        story_points: 2
+        feature_id: "F-010,F-011"
+        status: Backlog
+        start: "2026-07-19"
+        due: "2026-07-20"
+        ac: "顯示樹、可新增子分類"
+
+      - id: S2-T08
+        name: "S2-T08 前端 Transaction 列表頁（Ant Design Table + 分頁）"
+        epic: 交易管理
+        tech_area: 前端
+        story_points: 3
+        feature_id: "F-001"
+        status: Backlog
+        start: "2026-07-20"
+        due: "2026-07-22"
+        ac: "列表載入、分頁切換正確"
+
+      - id: S2-T09
+        name: "S2-T09 前端 Transaction 篩選列（日期、類別、類型、標籤）"
+        epic: 交易管理
+        tech_area: 前端
+        story_points: 3
+        feature_id: "F-001"
+        status: Backlog
+        start: "2026-07-22"
+        due: "2026-07-24"
+        ac: "URL query string 同步、F5 不丟篩選"
+
+      - id: S2-T10
+        name: "S2-T10 前端 Transaction 新增/編輯 Drawer"
+        epic: 交易管理
+        tech_area: 前端
+        story_points: 2
+        feature_id: "F-001"
+        status: Backlog
+        start: "2026-07-24"
+        due: "2026-07-25"
+        ac: "必填驗證、儲存後 invalidate React Query cache"
+
+      - id: S2-T11
+        name: "S2-T11 前端 多標籤 input（自由輸入 + autocomplete）"
+        epic: 分類與標籤
+        tech_area: 前端
+        story_points: 1
+        feature_id: "F-012"
+        status: Backlog
+        start: "2026-07-25"
+        due: "2026-07-26"
+        ac: "可新增、刪除、autocomplete 列出已用標籤"
