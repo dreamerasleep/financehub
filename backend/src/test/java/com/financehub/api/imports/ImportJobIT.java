@@ -135,6 +135,46 @@ class ImportJobIT {
     }
 
     @Test
+    void listReturnsOnlyOwnJobs() throws Exception {
+        String alice = register("listA+" + System.nanoTime() + "@example.com");
+        String bob = register("listB+" + System.nanoTime() + "@example.com");
+        createAccount(alice, "主帳戶", "TWD", "0.00");
+        createAccount(bob, "主帳戶", "TWD", "0.00");
+
+        byte[] bytes = readFixture("sample-mixed.csv");
+        mockMvc.perform(multipart("/api/v1/imports")
+                .file(new MockMultipartFile("file", "a.csv", "text/csv", bytes))
+                .header("Authorization", alice))
+                .andExpect(status().isCreated());
+        mockMvc.perform(multipart("/api/v1/imports")
+                .file(new MockMultipartFile("file", "b.csv", "text/csv", bytes))
+                .header("Authorization", bob))
+                .andExpect(status().isCreated());
+
+        mockMvc.perform(get("/api/v1/imports").header("Authorization", alice))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$[0].filename").value("a.csv"));
+    }
+
+    @Test
+    void tooManyRowsReturns400() throws Exception {
+        String bearer = register("big+" + System.nanoTime() + "@example.com");
+        createAccount(bearer, "主帳戶", "TWD", "0.00");
+
+        StringBuilder csv = new StringBuilder("date,type,account,amount,category,to_account,note\n");
+        for (int i = 0; i < 10001; i++) {
+            csv.append("2026-06-01,INCOME,主帳戶,1.00,薪資,,row").append(i).append('\n');
+        }
+        MockMultipartFile file = new MockMultipartFile(
+                "file", "big.csv", "text/csv", csv.toString().getBytes(StandardCharsets.UTF_8));
+
+        mockMvc.perform(multipart("/api/v1/imports")
+                        .file(file).header("Authorization", bearer))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
     void unauthenticatedReturns401() throws Exception {
         MockMultipartFile file = new MockMultipartFile(
                 "file", "x.csv", "text/csv", "date,type,account,amount\n".getBytes(StandardCharsets.UTF_8));

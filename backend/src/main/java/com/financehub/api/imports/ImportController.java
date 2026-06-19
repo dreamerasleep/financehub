@@ -1,5 +1,6 @@
 package com.financehub.api.imports;
 
+import com.financehub.application.imports.ImportCommitter;
 import com.financehub.application.imports.ImportJobService;
 import com.financehub.domain.imports.ImportJob;
 import com.financehub.security.AuthenticatedUser;
@@ -16,9 +17,11 @@ import java.util.List;
 public class ImportController {
 
     private final ImportJobService importJobService;
+    private final ImportCommitter importCommitter;
 
-    public ImportController(ImportJobService importJobService) {
+    public ImportController(ImportJobService importJobService, ImportCommitter importCommitter) {
         this.importJobService = importJobService;
+        this.importCommitter = importCommitter;
     }
 
     @PostMapping
@@ -52,5 +55,14 @@ public class ImportController {
                                        @PathVariable Long id) {
         importJobService.cancel(user.id(), id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/{id}/commit")
+    public ImportDtos.ImportCommitResult commit(
+            @AuthenticationPrincipal AuthenticatedUser user,
+            @PathVariable Long id,
+            @RequestBody(required = false) ImportDtos.CommitRequest request) {
+        List<Long> rowIds = request == null ? null : request.rowIds();
+        return importCommitter.commit(user.id(), id, rowIds);
     }
 }
