@@ -7,6 +7,10 @@ spring:
     url: ${DB_URL:jdbc:postgresql://localhost:5432/financehub}
     username: ${DB_USERNAME:financehub}
     password: ${DB_PASSWORD:financehub_dev}
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 5MB
   jpa:
     hibernate:
       ddl-auto: validate
@@ -44,6 +48,10 @@ financehub:
     jwt:
       secret: ${JWT_SECRET:dev-secret-change-me-please-use-at-least-32-bytes-long-key-xxx}
       expiration: ${JWT_EXPIRATION:PT24H}
+  import:
+    max-rows: 10000
+    job-ttl: PT24H
+    expiry-cron: "0 0 * * * *"
 
 logging:
   level:

@@ -1,0 +1,7 @@
+date,type,account,amount,category,to_account,note
+2026-06-01,INCOME,主帳戶,30000.00,薪資,,六月薪水
+2026-06-02,EXPENSE,主帳戶,250.50,飲食,,午餐
+2026-06-03,EXPENSE,主帳戶,1200,交通,,捷運月票
+06/01/2026,INCOME,主帳戶,100,薪資,,bad date row
+2026-06-05,INCOME,不存在,500,薪資,,bad account row
+2026-06-02,EXPENSE,主帳戶,250.50,飲食,,午餐
