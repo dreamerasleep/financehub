@@ -80,6 +80,7 @@ nav:
       - 註冊與登入: user-guide/auth.md
       - 帳戶管理: user-guide/accounts.md
       - 交易紀錄: user-guide/transactions.md
+      - CSV / Excel 匯入: user-guide/import.md
   - 系統架構:
       - architecture/index.md
       - 整體架構: architecture/overview.md
@@ -92,6 +93,7 @@ nav:
       - 驗證 API: api-reference/auth.md
       - 帳戶 API: api-reference/accounts.md
       - 交易 API: api-reference/transactions.md
+      - 匯入: api-reference/imports.md
   - 維運手冊:
       - operations/index.md
       - 本機開發: operations/local-dev.md

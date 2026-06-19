@@ -3,8 +3,8 @@
 > 本檔為**單一狀態真相來源**。每完成一段工作後即時更新「進度日誌」與下方任務狀態。
 > 詳細設計請見 [`plan.md`](./plan.md)；Sprint 任務藍圖請見 [`sprint-tasks-s0-s2.md`](./sprint-tasks-s0-s2.md)。
 
-- 最近更新：2026-06-18
-- 目前位置：**Sprint 2.5（TRANSFER 轉帳完成，前後端皆綠）**
+- 最近更新：2026-06-19
+- 目前位置：**Sprint 3（CSV / Excel 匯入完成，前後端皆綠，E2E 通過）**
 - GitHub Repo：[dreamerasleep/financehub](https://github.com/dreamerasleep/financehub)（public）
 
 ---
@@ -17,7 +17,7 @@
 | S1 | W2–3 | 使用者驗證 + 帳戶 CRUD | ✅ 完成（前後端） |
 | S2 | W4–5 | 交易紀錄 + 手動輸入 | ✅ 完成（前後端） |
 | S2.5 | W5 尾 | 轉帳交易（同幣別） | ✅ 完成（前後端） |
-| S3 | W6–7 | CSV / Excel 匯入 | ⏳ 規劃中 |
+| S3 | W6–7 | CSV / Excel 匯入 | ✅ 完成 |
 | S4 | W8–9 | 收據 OCR | ⏳ 規劃中 |
 | S5 | W10–11 | 公開 API 整合（匯率 / 股價） | ⏳ 規劃中 |
 | S6 | W12–13 | Dashboard + ECharts 視覺化 | ⏳ 規劃中 |
@@ -76,7 +76,7 @@
 
 ## 3. 進行中（In progress）
 
-目前**無**進行中項目。下一步：Sprint 3（CSV/Excel 匯入）。
+目前**無**進行中項目。下一步：Sprint 4（收據 OCR）。
 
 ---
 
@@ -104,10 +104,10 @@
 
 ### Sprint 3 — CSV / Excel 匯入
 
-- [ ] CSV 解析（Apache Commons CSV）+ 預覽 + 確認入庫
-- [ ] Excel 解析（Apache POI）
-- [ ] 匯入錯誤回報（哪一列、什麼錯）
-- [ ] 前端拖放上傳與預覽 UI
+- [x] CSV 解析（Apache Commons CSV）+ 預覽 + 確認入庫
+- [x] Excel 解析（Apache POI）
+- [x] 匯入錯誤回報（哪一列、什麼錯）
+- [x] 前端拖放上傳與預覽 UI
 
 ### Sprint 4 — 收據 OCR
 
@@ -165,6 +165,22 @@
 ## 6. 進度日誌（Changelog）
 
 > 每次告一段落時新增一筆條目（最新在最上方）。
+
+### 2026-06-19 — Sprint 3 完成（CSV / Excel 匯入）
+
+- 後端：Flyway V4 加 `import_jobs`、`import_job_rows` 雙表（JSONB raw、SHA-256 dedup hash、`ON DELETE SET NULL` FK 設計），`expires_at` 預設 +24h
+- `TransactionFileParser` 抽象 + `CsvTransactionFileParser`（Apache Commons CSV）/ `XlsxTransactionFileParser`（Apache POI XSSFWorkbook）；UTF-8 BOM/charset 自動處理
+- `RowResolver` 把每列 raw 解成 `parsed_*` + `dedup_hash`；錯誤訊息對應 user-facing 表（帳戶不存在、分類不符、跨幣別轉帳等）
+- `ImportJobService` 上傳 → 解析 → 全列入 staging；`ImportCommitter` 在 `@Transactional` 內呼叫既有 `TransactionService`，餘額同步沿用、無重複邏輯
+- 確認 commit 前以 `PESSIMISTIC_WRITE` 鎖 OK 列重跑 resolver，期間若有資料變動會把列改回 ERROR 並回 409
+- `ExpiryScheduler`（`@Scheduled`）每小時把 24h 未確認的 job 標 `EXPIRED`
+- 13 MB / 10000 列上限：multipart 413 與 row-count 400 handler 一併補上
+- 後端測試擴充至 **39/39 IT**（+19）+ 17 個 parser/resolver 單元測試全綠
+- 前端：`/import` 頁（AntD Dragger + Table + Statistic + Popconfirm）；OK 預設全勾、ERROR/DUPLICATE checkbox 強制 disabled；確認鈕顯示選取列數；commit 後 `invalidateQueries(['transactions','accounts'])` 並導向 `/transactions`
+- 導覽列新增「匯入」入口
+- Playwright E2E（單檔 6 列：OK 2 / ERROR 2 / DUPLICATE 2）：預覽計數、選取規則、部分 commit、餘額更新（10000 → 8549.50）、重上傳 dedup 全部驗證通過；E2E 不需修 code → 不開額外 commit
+- 文件：新增 `user-guide/import.md`、`api-reference/imports.md`；`architecture/database.md` 補 V4 兩表；`changelog.md`、`index.md`、`mkdocs.yml` 同步
+- **下一步**：Sprint 4（收據 OCR）或 R1 風險決議（Google Vision vs Tesseract）
 
 ### 2026-06-18 — Sprint 2.5 完成（TRANSFER 轉帳）
 

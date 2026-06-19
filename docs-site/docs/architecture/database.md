@@ -14,7 +14,6 @@ users ─┬─< accounts ─┐
 `transactions` 同時參照 `accounts` 與 `categories`；`categories.user_id` 為 NULL 代表系統預設分類，全使用者共用。
 
 未來會加：
-- `import_jobs` (Sprint 3)
 - `receipts` (Sprint 4)
 - `fx_rates`, `stock_quotes` (Sprint 5)
 - `budgets` (Sprint 6)
@@ -98,6 +97,35 @@ users ─┬─< accounts ─┐
 - `idx_transactions_user_date` on `(user_id, txn_date DESC)`（列表頁主要查詢）
 
 餘額同步：`TransactionService` 在 `@Transactional` 內同時寫入交易並調整 `accounts.current_balance`。轉帳會同時調整來源（−amount）與目標（+amount）兩邊，更新 / 刪除前會先還原雙邊舊金額。跨幣別轉帳目前回 400，待 Sprint 5 匯率服務上線後解鎖。
+
+### `import_jobs` (V4)
+
+| 欄位 | 型別 | 限制 | 說明 |
+| ---- | ---- | ---- | ---- |
+| `id` | `BIGSERIAL` | PK | |
+| `user_id` | `BIGINT` | NOT NULL FK → `users.id` CASCADE | |
+| `filename` | `VARCHAR(255)` | NOT NULL | 原始檔名 |
+| `format` | `VARCHAR(10)` | NOT NULL, CHECK | `CSV` / `XLSX` |
+| `status` | `VARCHAR(20)` | NOT NULL, CHECK | `PENDING` / `COMMITTED` / `CANCELLED` / `EXPIRED` |
+| `row_count` `ok_count` `error_count` `dup_count` | `INT` | NOT NULL default 0 | 統計快取 |
+| `created_at` | `TIMESTAMPTZ` | NOT NULL default `now()` | |
+| `committed_at` | `TIMESTAMPTZ` | NULL | 確認時間 |
+| `expires_at` | `TIMESTAMPTZ` | NOT NULL default `now()+24h` | TTL |
+
+### `import_job_rows` (V4)
+
+| 欄位 | 型別 | 限制 | 說明 |
+| ---- | ---- | ---- | ---- |
+| `id` | `BIGSERIAL` | PK | |
+| `job_id` | `BIGINT` | NOT NULL FK → `import_jobs.id` CASCADE | |
+| `row_index` | `INT` | NOT NULL, `(job_id, row_index)` UNIQUE | 1-based |
+| `raw_json` | `JSONB` | NOT NULL | 原始一列 |
+| `parsed_type` `parsed_amount` `parsed_date` `parsed_account_id` `parsed_to_account_id` `parsed_category_id` `parsed_note` | 與 transactions 同 | 所有 FK 用 ON DELETE SET NULL | 預解析結果 |
+| `dedup_hash` | `CHAR(64)` | | SHA-256(canonical key) |
+| `status` | `VARCHAR(15)` | NOT NULL, CHECK | `OK` / `ERROR` / `DUPLICATE` |
+| `error_message` | `VARCHAR(500)` | NULL | 失敗原因 |
+
+`dedup_hash` 算法與 `transactions` 列在 commit 流程內逐筆比對；既有 `transactions` 表**不**新增 hash 欄。
 
 ## 設計取捨
 

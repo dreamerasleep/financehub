@@ -6,7 +6,21 @@
 
 ---
 
-## [Unreleased] — Sprint 2.5 完成
+## [Unreleased] — Sprint 3 完成
+
+### 新增（後端）
+- Flyway V4:`import_jobs`、`import_job_rows` 雙表 + JSONB raw、SHA-256 dedup hash
+- CSV / XLSX 匯入:parser 抽象（Commons CSV + POI streaming）、RowResolver、ImportJobService、ImportCommitter（呼叫既有 TransactionService 完成餘額同步）
+- 過期排程:`@Scheduled` 每小時把 24h 未確認的 job 標 EXPIRED
+- 整合測試擴充至 39 筆（+19）+ 17 個 parser/resolver 單元測試
+
+### 新增（前端）
+- `/import` 頁:拖放上傳、預覽表（OK / 錯誤 / 重複狀態彩色 tag）、checkbox 規則（ERROR/DUPLICATE 不可勾）、部分確認匯入、取消
+- 導覽列加「匯入」入口
+
+---
+
+## [0.3.5] — 2026-06-18 — Sprint 2.5
 
 ### 新增（後端）
 - Flyway V3 migration：`transactions.to_account_id`、`category_id` 改 NULL、`type` CHECK 加 `TRANSFER`、`chk_transactions_transfer_shape` 跨欄位約束
