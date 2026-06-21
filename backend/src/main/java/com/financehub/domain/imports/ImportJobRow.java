@@ -71,6 +71,7 @@ public class ImportJobRow {
     public Long getJobId() { return jobId; }
     public int getRowIndex() { return rowIndex; }
     public String getRawJson() { return rawJson; }
+    public void setRawJson(String v) { this.rawJson = v; }
     public TransactionType getParsedType() { return parsedType; }
     public void setParsedType(TransactionType v) { this.parsedType = v; }
     public BigDecimal getParsedAmount() { return parsedAmount; }
