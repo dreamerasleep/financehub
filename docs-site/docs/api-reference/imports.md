@@ -70,6 +70,55 @@
 { "jobId": 12, "committedCount": 2, "transactionIds": [201, 202] }
 ```
 
+## 編輯預覽列
+
+`PATCH /imports/{jobId}/rows/{rowId}` — 修正 ERROR / DUPLICATE 列，後端會重跑同樣的解析與 dedup 邏輯。
+
+**Request body**
+
+```json
+{
+  "date": "2026-06-20",
+  "type": "EXPENSE",
+  "account": "主帳戶",
+  "amount": "150.00",
+  "category": "飲食",
+  "to_account": "",
+  "note": "午餐"
+}
+```
+
+七個欄位皆為字串，與 CSV upload 同形狀；空字串等於未填。
+
+**Response 200**
+
+```json
+{
+  "row": {
+    "id": 45, "rowIndex": 5, "status": "OK",
+    "parsedDate": "2026-06-20", "parsedType": "EXPENSE",
+    "parsedAmount": 150.00, "parsedAccountId": 12,
+    "parsedToAccountId": null, "parsedCategoryId": 7,
+    "parsedNote": "午餐", "errorMessage": null
+  },
+  "job": {
+    "id": 123, "rowCount": 10,
+    "okCount": 8, "errorCount": 1, "dupCount": 1
+  }
+}
+```
+
+**Error codes**（response body 用 `error` 欄帶下表 snake code）
+
+| HTTP | error |
+| --- | --- |
+| 404 | `not_found`（job 或 row 不存在 / 不屬於 caller）|
+| 409 | `job_not_pending`（job.status ≠ PENDING）|
+| 403 | `ok_row_not_editable`（row.status = OK）|
+| 400 | `invalid_request`（body 結構錯誤）|
+
+注意：欄位內容錯誤（amount 非數字、account 不存在等）回 200 + `row.status=ERROR` + `errorMessage`，不算 4xx。
+
 ## 取消
 
 `POST /imports/{id}/cancel` → `204`
