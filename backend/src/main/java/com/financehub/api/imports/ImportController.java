@@ -65,4 +65,13 @@ public class ImportController {
         List<Long> rowIds = request == null ? null : request.rowIds();
         return importCommitter.commit(user.id(), id, rowIds);
     }
+
+    @PatchMapping("/{jobId}/rows/{rowId}")
+    public ImportDtos.PatchRowResponse patchRow(
+            @AuthenticationPrincipal AuthenticatedUser user,
+            @PathVariable Long jobId,
+            @PathVariable Long rowId,
+            @RequestBody ImportDtos.PatchRowRequest body) {
+        return importJobService.patchRow(user.id(), jobId, rowId, body);
+    }
 }

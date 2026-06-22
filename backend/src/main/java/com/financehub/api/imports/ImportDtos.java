@@ -67,4 +67,19 @@ public final class ImportDtos {
             int committedCount,
             List<Long> transactionIds
     ) {}
+
+    public record PatchRowRequest(
+            String date,
+            String type,
+            String account,
+            String amount,
+            String category,
+            @com.fasterxml.jackson.annotation.JsonProperty("to_account") String toAccount,
+            String note
+    ) {}
+
+    public record PatchRowResponse(
+            ImportJobResponse job,
+            ImportJobRowResponse row
+    ) {}
 }

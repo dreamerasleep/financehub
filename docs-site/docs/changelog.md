@@ -6,6 +6,27 @@
 
 ---
 
+## [Unreleased] — Sprint 3.5 預覽頁強化
+
+### 新增
+
+- **預覽頁就地編輯**：ERROR / DUPLICATE 列可開 Drawer 改 7 欄位、重新驗證；改成 OK 會自動勾選
+- **狀態篩選**：Radio 切換 全部 / OK / ERROR / DUPLICATE
+- **批次選取**：全選 OK 列 / 反選 / 清空，跨頁有效
+- **PATCH `/api/v1/imports/{jobId}/rows/{rowId}`**：後端重跑 RowResolver 與 dedup
+
+### 修正
+
+- ImportPage：移除 `effectiveSelection` fallback，使用者「清空」後不再被預設覆寫
+
+### 測試
+
+- 後端：11 個新 IT (`ImportRowPatchIT`) + 既有 49 案 = 60 IT 全綠
+- 前端：新增 vitest，7 個 selection helper 單元測試；`tsc -b`、`eslint` 全綠
+- E2E：Playwright MCP 自動跑 5/5 情境全通過（filter、bulk、編輯 ERROR→OK、編輯 DUP 仍 DUP、selection 跨 filter 保留）
+
+---
+
 ## [Unreleased] — Sprint 3 完成
 
 ### 新增（後端）

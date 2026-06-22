@@ -7,8 +7,10 @@ import com.financehub.domain.category.CategoryRepository;
 import com.financehub.domain.imports.ImportFormat;
 import com.financehub.domain.imports.ImportJob;
 import com.financehub.domain.imports.ImportJobRepository;
+import com.financehub.api.imports.ImportDtos;
 import com.financehub.domain.imports.ImportJobRow;
 import com.financehub.domain.imports.ImportJobRowRepository;
+import com.financehub.domain.imports.ImportJobRowStatus;
 import com.financehub.domain.imports.ImportJobStatus;
 import com.financehub.domain.transaction.Transaction;
 import com.financehub.domain.transaction.TransactionRepository;
@@ -162,6 +164,98 @@ public class ImportJobService {
             throw new IllegalStateException("Job is not PENDING (status=" + job.getStatus() + ")");
         }
         job.setStatus(ImportJobStatus.CANCELLED);
+    }
+
+    @Transactional
+    public ImportDtos.PatchRowResponse patchRow(
+            Long userId,
+            Long jobId,
+            Long rowId,
+            ImportDtos.PatchRowRequest body) {
+
+        ImportJob job = jobRepository.findByIdAndUserId(jobId, userId)
+                .orElseThrow(() -> new EntityNotFoundException("Import job not found"));
+
+        if (job.getStatus() != ImportJobStatus.PENDING) {
+            throw new JobNotPendingException(
+                    "Job is not PENDING (status=" + job.getStatus() + ")");
+        }
+
+        ImportJobRow row = rowRepository.findByIdAndJobId(rowId, jobId)
+                .orElseThrow(() -> new EntityNotFoundException("Import row not found"));
+
+        if (row.getStatus() == ImportJobRowStatus.OK) {
+            throw new OkRowNotEditableException(
+                    "OK rows cannot be edited; cancel selection or re-upload instead");
+        }
+
+        Map<String, Long> accountsByNameLower = new HashMap<>();
+        Map<Long, String> currencyByAccount = new HashMap<>();
+        for (Account a : accountRepository.findByUserIdOrderByIdAsc(userId)) {
+            accountsByNameLower.put(a.getName().toLowerCase(), a.getId());
+            currencyByAccount.put(a.getId(), a.getCurrency());
+        }
+        Map<String, Long> categoriesByKey = new HashMap<>();
+        for (Category c : categoryRepository.findVisibleTo(userId)) {
+            String key = c.getName().toLowerCase() + "|" + c.getKind().name();
+            categoriesByKey.put(key, c.getId());
+        }
+
+        Map<String, String> raw = new HashMap<>();
+        raw.put("date", body.date() == null ? "" : body.date());
+        raw.put("type", body.type() == null ? "" : body.type());
+        raw.put("account", body.account() == null ? "" : body.account());
+        raw.put("amount", body.amount() == null ? "" : body.amount());
+        raw.put("category", body.category() == null ? "" : body.category());
+        raw.put("to_account", body.toAccount() == null ? "" : body.toAccount());
+        raw.put("note", body.note() == null ? "" : body.note());
+
+        Set<String> existingDbHashes = computeExistingHashesForSingleRow(userId, raw);
+        Set<String> batchHashesSoFar =
+                rowRepository.findOkDedupHashesByJobIdExcept(jobId, rowId);
+
+        RawRow rawRow = new RawRow(row.getRowIndex(), raw);
+        ResolvedRow resolved = rowResolver.resolve(userId, rawRow,
+                accountsByNameLower, currencyByAccount, categoriesByKey,
+                existingDbHashes, batchHashesSoFar);
+
+        row.setStatus(resolved.status());
+        row.setParsedType(resolved.type());
+        row.setParsedAmount(resolved.amount());
+        row.setParsedDate(resolved.date());
+        row.setParsedAccountId(resolved.accountId());
+        row.setParsedToAccountId(resolved.toAccountId());
+        row.setParsedCategoryId(resolved.categoryId());
+        row.setParsedNote(resolved.note());
+        row.setDedupHash(resolved.dedupHash());
+        row.setErrorMessage(resolved.errorMessage());
+        row.setRawJson(toJson(raw));
+        rowRepository.save(row);
+
+        long okCount = rowRepository.countByJobIdAndStatus(jobId, ImportJobRowStatus.OK);
+        long errorCount = rowRepository.countByJobIdAndStatus(jobId, ImportJobRowStatus.ERROR);
+        long dupCount = rowRepository.countByJobIdAndStatus(jobId, ImportJobRowStatus.DUPLICATE);
+        job.setOkCount((int) okCount);
+        job.setErrorCount((int) errorCount);
+        job.setDupCount((int) dupCount);
+        jobRepository.save(job);
+
+        return new ImportDtos.PatchRowResponse(
+                ImportDtos.ImportJobResponse.from(job),
+                ImportDtos.ImportJobRowResponse.from(row));
+    }
+
+    private Set<String> computeExistingHashesForSingleRow(Long userId, Map<String, String> raw) {
+        LocalDate date = tryParseDate(raw.get("date"));
+        if (date == null) return Set.of();
+        List<Transaction> candidates = transactionRepository
+                .findByUserIdAndTxnDateBetween(userId, date, date);
+        Set<String> hashes = new HashSet<>();
+        for (Transaction t : candidates) {
+            hashes.add(DedupHash.of(userId, t.getAccountId(), t.getType(),
+                    t.getAmount(), t.getTxnDate(), t.getNote()));
+        }
+        return hashes;
     }
 
     private ImportFormat detectFormat(String filename) {

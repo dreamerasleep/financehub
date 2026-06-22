@@ -43,3 +43,18 @@ export interface ImportCommitResult {
   committedCount: number
   transactionIds: number[]
 }
+
+export interface PatchRowRequest {
+  date: string
+  type: 'INCOME' | 'EXPENSE' | 'TRANSFER'
+  account: string
+  amount: string
+  category: string
+  to_account: string
+  note: string
+}
+
+export interface PatchRowResponse {
+  job: ImportJob
+  row: ImportJobRow
+}

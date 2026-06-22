@@ -64,4 +64,18 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE)
                 .body(ApiError.of("payload_too_large", "File exceeds maximum size"));
     }
+
+    @ExceptionHandler(com.financehub.application.imports.OkRowNotEditableException.class)
+    public ResponseEntity<ApiError> handleOkRowNotEditable(
+            com.financehub.application.imports.OkRowNotEditableException ex) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(ApiError.of("ok_row_not_editable", ex.getMessage()));
+    }
+
+    @ExceptionHandler(com.financehub.application.imports.JobNotPendingException.class)
+    public ResponseEntity<ApiError> handleJobNotPending(
+            com.financehub.application.imports.JobNotPendingException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(ApiError.of("job_not_pending", ex.getMessage()));
+    }
 }

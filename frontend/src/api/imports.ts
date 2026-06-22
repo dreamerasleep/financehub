@@ -3,6 +3,8 @@ import type {
   ImportCommitResult,
   ImportJob,
   ImportJobDetail,
+  PatchRowRequest,
+  PatchRowResponse,
 } from '@/types/import'
 
 export async function uploadImport(file: File): Promise<ImportJob> {
@@ -32,4 +34,16 @@ export async function commitImport(
 
 export async function cancelImport(id: number): Promise<void> {
   await apiClient.post(`/api/v1/imports/${id}/cancel`)
+}
+
+export async function patchImportRow(
+  jobId: number,
+  rowId: number,
+  body: PatchRowRequest,
+): Promise<PatchRowResponse> {
+  const { data } = await apiClient.patch<PatchRowResponse>(
+    `/api/v1/imports/${jobId}/rows/${rowId}`,
+    body,
+  )
+  return data
 }
