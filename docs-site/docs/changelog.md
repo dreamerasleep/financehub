@@ -23,7 +23,7 @@
 
 - 後端：11 個新 IT (`ImportRowPatchIT`) + 既有 49 案 = 60 IT 全綠
 - 前端：新增 vitest，7 個 selection helper 單元測試；`tsc -b`、`eslint` 全綠
-- E2E：保留手動 MCP 探索式驗證（5 情境清單列於 Sprint 3.5 plan §Task 06，未自動執行）
+- E2E：Playwright MCP 自動跑 5/5 情境全通過（filter、bulk、編輯 ERROR→OK、編輯 DUP 仍 DUP、selection 跨 filter 保留）
 
 ---
 

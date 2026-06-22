@@ -4,7 +4,7 @@
 > 詳細設計請見 [`plan.md`](./plan.md)；Sprint 任務藍圖請見 [`sprint-tasks-s0-s2.md`](./sprint-tasks-s0-s2.md)。
 
 - 最近更新：2026-06-22
-- 目前位置：**Sprint 3.5（Import 預覽頁強化完成，前後端皆綠；MCP E2E 5 情境保留手動驗證）**
+- 目前位置：**Sprint 3.5（Import 預覽頁強化完成，前後端皆綠，Playwright MCP E2E 5/5 通過）**
 - GitHub Repo：[dreamerasleep/financehub](https://github.com/dreamerasleep/financehub)（public）
 
 ---
@@ -18,7 +18,7 @@
 | S2 | W4–5 | 交易紀錄 + 手動輸入 | ✅ 完成（前後端） |
 | S2.5 | W5 尾 | 轉帳交易（同幣別） | ✅ 完成（前後端） |
 | S3 | W6–7 | CSV / Excel 匯入 | ✅ 完成 |
-| S3.5 | W7 尾 | Import 預覽頁強化（filter / bulk / inline edit） | ✅ 完成（前後端，E2E 待手動） |
+| S3.5 | W7 尾 | Import 預覽頁強化（filter / bulk / inline edit） | ✅ 完成（前後端 + MCP E2E 5/5） |
 | S4 | W8–9 | 收據 OCR | ⏳ 規劃中 |
 | S5 | W10–11 | 公開 API 整合（匯率 / 股價） | ⏳ 規劃中 |
 | S6 | W12–13 | Dashboard + ECharts 視覺化 | ⏳ 規劃中 |
@@ -173,9 +173,10 @@
 - 測試：`ImportRowPatchIT` 11 案綠（含 ERROR→OK、ERROR→DUP、DUP→OK、403、404、409、counters、不 retroactively flip），總 IT 60/60 綠
 - 前端：拆出 `ImportToolbar`（filter + bulk 按鈕）、`ImportRowEditDrawer`（AntD Form + PATCH mutation）；移除 `effectiveSelection` fallback bug（使用者「清空」/「反選」現在實際生效）；裝 vitest 跑 selection helpers 7 案綠；`tsc -b` / `eslint` 皆綠
 - 分支：`feature/sprint-3.5-import-preview`，C1 `5c4dc5d`（backend PATCH + IT）、C2 `b45078c`（toolbar + helpers + vitest）、C3 `e6985d2`（drawer + ImportPage 整合）、C4 `<本 commit>`（docs sync）
-- E2E：MCP 探索式 5 情境清單列於 `docs/superpowers/plans/2026-06-20-import-preview-enhancements.md` §Task 06，本回合**未自動執行**，留待後續手動驗證
+- E2E：Playwright MCP 自動跑 5/5 情境全綠 — (1) filter ALL/OK/ERROR/DUPLICATE 切換 (2) bulk select OK + 反選 + 清空 計數正確 (3) ERROR 列(missing date)→ 編輯加日期 → status 翻 OK + 自動勾選 (4) DUP 列原樣 save → 仍 DUP + checkbox 仍 disabled (5) 勾 2 列後切 filter ERROR → 切回 ALL → selection 保留、commit 後 transactions 從 5 變 7 筆
 - 文件：`user-guide/import.md` 新增「修正錯誤列」「篩選與批次選取」；`api-reference/imports.md` 新增 PATCH 段落；`changelog.md` 新增 Sprint 3.5 unreleased
-- **下一步**：T06 手動 MCP 驗證 → Sprint 4（收據 OCR）或 R1 風險決議（Google Vision vs Tesseract）
+- PR：[#1 Sprint 3.5: import preview enhancements](https://github.com/dreamerasleep/financehub/pull/1)(未 merge)
+- **下一步**：merge PR → Sprint 4（收據 OCR）或 R1 風險決議（Google Vision vs Tesseract）
 
 ### 2026-06-19 — Sprint 3 完成（CSV / Excel 匯入）
 
